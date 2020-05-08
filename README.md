@@ -1,64 +1,40 @@
----
-page_type: sample
-languages:
-- csharp
-products:
-- dotnet
-description: "Add 150 character max description"
-urlFragment: "update-this-to-unique-url-stub"
----
+# Brainy
 
-# Official Microsoft Sample
+The Brainy bot is an app template for Microsoft Teams. Finding the right person for a specific task can be a challenge, especially when different roles within an organization must work as a team. Brainy makes the collaboration across these roles more structured and efficient by orchestrating its flow.
 
-<!-- 
-Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
+The three roles are as follows:
 
-Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
+- **Task owner (TO)**: submits a task
+- **Task manager (TM)**: assigns task to a task executor or declines it
+- **Task executor (TE)**: accepts or declines the task
 
-Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
--->
+The Brainy bot enables a fast and simple process flow through the use of customized adaptive cards which embed various user friendly features.
 
-Give a short description for your sample here. What does it do and why is it important?
+[Deployment guide](https://github.com/microsoft/microsoft-teams-brainy-bot/wiki/Deployment-Guide)
 
-## Contents
+# Main Features
 
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
+**Task owner components:**
 
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `src`             | Sample source code.                        |
-| `.gitignore`      | Define what to ignore at commit time.      |
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE`         | The license for the sample.                |
+* To submit a new task, the task owner fills in a task form, which includes different types of input fields.
 
-## Prerequisites
+![overview1.gif](https://github.com/microsoft/microsoft-teams-brainy-bot/wiki/.attachments/overview1.gif)
 
-Outline the required components and tools that a user might need to have on their machine in order to run the sample. This can be anything from frameworks, SDKs, OS versions or IDE releases.
+* The TO will be notified once a task has been assigned and accepted.
 
-## Setup
+**Task manager components:**
 
-Explain how to prepare the sample once the user clones or downloads the repository. The section should outline every step necessary to install dependencies and set up any settings (for example, API keys and output folders).
+- The task submitted by the TO is directed to a group where it is reviewed by one or multiple TM.
+- The task can be declined with the click of a button; the decline notification and related comment will then land in the TO's chat, after which the task can be modified and re-submitted.
+- The TM can assign the task through selecting the desired TE from a drop-down list; TM can also add a comment to offer further guidance to the TE.
 
-## Running the sample
+![overview2.gif](https://github.com/microsoft/microsoft-teams-brainy-bot/wiki/.attachments/overview2.gif)
 
-Outline step-by-step instructions to execute the sample and see its output. Include steps for executing the sample from the IDE, starting specific services in the Azure portal or anything related to the overall launch of the code.
+**Task executor components:**
 
-## Key concepts
+* Once the TM assigns a task, a new task notification will be sent to the TE.
 
-Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other.
+![overview3.gif](https://github.com/microsoft/microsoft-teams-brainy-bot/wiki/.attachments/overview3.gif)
 
-## Contributing
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+- The card received by the TE contains all information submitted by the TO and the TM's comment
+- The TE can Accept/Decline, open a chat with the TM/TO and schedule a meeting with the TM/TO through the click of a button
