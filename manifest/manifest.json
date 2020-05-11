@@ -1,0 +1,35 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.3/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.3",
+  "version": "1.0",
+  "id": "<botid>",
+  "packageName": "com.microsoft.teams.brainy",
+  "developer": {
+    "name": "<company name>",
+    "websiteUrl": "<website url>",
+    "privacyUrl": "<privacy url>",
+    "termsOfUseUrl": "<terms of use url>"
+  },
+  "name": {
+    "short": "Brainy",
+    "full": "Brainy Resource Allocation Bot"
+  },
+  "description": {
+    "short": "Brainy is a bot for resource allocation within teams of different roles.",
+    "full": "Brainy is a bot for resource allocation within teams of different roles to make life more productive."
+  },
+  "icons": {
+    "outline": "outline.png",
+    "color": "color.png"
+  },
+  "accentColor": "#7E62AB",
+  "bots": [
+    {
+      "botId": "<bot id>",
+      "scopes": ["personal", "groupchat", "team"],
+      "isNotificationOnly": true
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["<app domain>"]
+}

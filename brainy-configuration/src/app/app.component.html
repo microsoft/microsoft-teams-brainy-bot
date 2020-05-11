@@ -1,0 +1,64 @@
+<div *ngIf="pageLoaded">
+
+  <div class="toolbar" role="banner">
+    <span class=toolbar-title>Welcome to Brainy's Configuration</span>
+    <span class="toolbar-user"><span class="d-none d-lg-inline">{{ loggedInUser.upn }}</span><a class="btn-logout"
+        href="/logout">Log Out</a></span>
+  </div>
+
+  <h2 class="text-middle">Configure Manager Team</h2>
+  <form class="form-small" #managerTeamForm="ngForm" (ngSubmit)="submitManagerTeamId(managerTeamForm.form)">
+    <label class="form-label" for="teamid">Manager Team ID</label>
+    <div class="input-group">
+      <input required class=" form-control form-control-sm" type="text" [(ngModel)]="managerTeam.teamid" name="teamid"
+        #teamid="ngModel" required />
+      <div class="input-group-append">
+        <button class="btn btn-outline-primary btn-sm" type="submit" [disabled]="!teamid.valid">
+          Submit
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <h2 class="text-middle">Configure User Memberships</h2>
+  <form class="form-big">
+    <input class="form-control form-control-sm" type="text" placeholder="Search" name="searchString"
+      [(ngModel)]="searchString">
+  </form>
+
+  <table class="table table-sm table-striped">
+    <thead>
+      <tr>
+        <th>User UPN</th>
+        <th>Manager</th>
+        <th>Task executor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let userMembership of userMemberships | filter : 'userupn' : searchString;">
+        <td>
+          {{userMembership.userupn}}
+        </td>
+        <td>
+          <button *ngIf="userMembership.manager === false" class="btn"
+            (click)="insertMembership(userMembership.userupn, 'manager')">❌</button>
+          <button *ngIf="userMembership.manager === true" class="btn"
+            (click)="deleteMembership(userMembership.userupn, 'manager')">✔️</button>
+        </td>
+        <td>
+          <button *ngIf="userMembership.specialist === false" class=" btn"
+            (click)="insertMembership(userMembership.userupn, 'specialist')">❌</button>
+          <button *ngIf="userMembership.specialist === true" class="btn"
+            (click)="deleteMembership(userMembership.userupn, 'specialist')">✔️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div *ngIf="!pageLoaded">
+  <div class="spinner-border" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>

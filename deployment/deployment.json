@@ -1,0 +1,408 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseResourceName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The base name to use for the resources that will be provisioned."
+      }
+    },
+    "botAppID": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the bot Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "botAppPassword": {
+      "type": "securestring",
+      "minLength": 1,
+      "metadata": {
+        "description": "The client secret of the bot Azure AD app."
+      }
+    },
+    "botIconUrl": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "https://raw.githubusercontent.com/microsoft/microsoft-teams-brainy-bot/master/manifest/color.png",
+      "metadata": {
+        "description": "The link to the icon for the bot. It must resolve to a PNG file smaller than 30kb."
+      }
+    },
+    "tenantID": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "minLength": 1,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The ID of the tenant to which the app will be deployed."
+      }
+    },
+    "configAppID": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the of the configuration Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "configAdminUPNList": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to access the configuration app."
+      }
+    },
+    "sqlUsername": {
+      "type": "securestring",
+      "minLength": 1,
+      "metadata": {
+        "description": "The SQL server administrator username for the bot."
+      }
+    },
+    "sqlPassword": {
+      "type": "securestring",
+      "minLength": 1,
+      "metadata": {
+        "description": "The SQL server administrator password."
+      }
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "gitRepoUrl": {
+      "type": "string",
+	  "defaultValue": "https://github.com/microsoft/microsoft-teams-brainy-bot.git",
+      "metadata": {
+         "description": "The URL to the GitHub repository to deploy."
+      }
+    },
+    "gitBranch": {
+      "type": "string",
+      "metadata": {
+        "description": "The branch of the GitHub repository to deploy."
+      },
+      "defaultValue": "master"
+    }
+  },
+  "variables": {
+    "botDisplayName": "Brainy",
+    "botDescription": "Brainy is a bot for resource allocation within teams of different roles.",
+    "botAppName": "[parameters('baseResourceName')]",
+    "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.net')]",
+    "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
+    "botAppInsightsName": "[parameters('baseResourceName')]",
+    "configAppName": "[concat(parameters('baseResourceName'), '-config')]",
+    "configAppUrl": "[concat('https://', variables('configAppName'), '.azurewebsites.net')]",
+    "botMessagingUrl": "[concat(variables('botAppUrl'), '/api/messages')]",
+    "botUniqueName": "[parameters('baseResourceName')]",
+    "sqlServerName": "[parameters('baseResourceName')]",
+    "hostingPlanName": "[parameters('baseResourceName')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2016-09-01",
+      "name": "[variables('hostingPlanName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "name": "[variables('hostingPlanName')]",
+        "hostingEnvironment": "",
+        "numberOfWorkers": 1
+      },
+      "sku": {
+        "name": "P1v2",
+        "tier": "PremiumV2",
+        "size": "P1v2",
+        "family": "Pv2",
+        "capacity": 1
+      }
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('botAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "app",
+      "properties": {
+        "name": "[variables('botAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "enabled": true,
+        "reserved": false,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": true,
+        "siteConfig": {
+          "alwaysOn": true,
+          "appSettings": [
+            {
+              "name": "SITE_ROLE",
+              "value": "bot"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "12.13.0"
+            },
+            {
+              "name": "APP_ID",
+              "value": "[parameters('botAppID')]"
+            },
+            {
+              "name": "APP_PASSWORD",
+              "value": "[parameters('botAppPassword')]"
+            },
+            {
+              "name": "DB_SERVERNAME",
+              "value": "[concat(variables('sqlServerName'), '.database.windows.net')]"
+            },
+            {
+              "name": "DB_USERNAME",
+              "value": "[parameters('sqlUserName')]"
+            },
+            {
+              "name": "DB_PASSWORD",
+              "value": "[parameters('sqlPassword')]"
+            },
+            {
+              "name": "DB_NAME",
+              "value": "brainysql"
+            },
+            {
+              "name": "BASE_DOMAIN",
+              "value": "[variables('botAppUrl')]"
+            },
+            {
+              "name": "TENANT_ID",
+              "value": "[parameters('tenantID')]"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Insights/components/', variables('botAppInsightsName'))]",
+        "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), 'brainysql')]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2016-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[variables('botAppInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+      },
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "rest"
+      }
+    },
+    {
+      "name": "[variables('botUniqueName')]",
+      "type": "Microsoft.BotService/botServices",
+      "location": "global",
+      "apiVersion": "2018-07-12",
+      "tags": {},
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "sdk",
+      "properties": {
+        "displayName": "[variables('botDisplayName')]",
+        "description": "[variables('botDescription')]",
+        "endpoint": "[variables('botMessagingUrl')]",
+        "iconUrl": "[parameters('botIconUrl')]",
+        "msaAppId": "[parameters('botAppID')]",
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', parameters('baseResourceName')), '2015-05-01').InstrumentationKey]"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('botUniqueName'), '/MsTeamsChannel')]",
+          "type": "Microsoft.BotService/botServices/channels",
+          "apiVersion": "2018-07-12",
+          "location": "global",
+          "tags": {},
+          "sku": {
+            "name": "F0"
+          },
+          "properties": {
+            "channelName": "MsTeamsChannel",
+            "location": "global",
+            "properties": {
+              "isEnabled": true
+            }
+          },
+          "dependsOn": [
+            "[concat('Microsoft.BotService/botServices/', variables('botUniqueName'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2015-05-01-preview",
+      "name": "[variables('sqlServerName')]",
+      "location": "[parameters('location')]",
+      "kind": "v12.0",
+      "properties": {
+        "administratorLogin": "[parameters('sqlUsername')]",
+        "administratorLoginPassword": "[parameters('sqlPassword')]",
+        "version": "12.0"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2017-10-01-preview",
+      "name": "[concat(variables('sqlServerName'), '/brainysql')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 10
+      },
+      "kind": "v12.0,user",
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxSizeBytes": 268435456000,
+        "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "zoneRedundant": false,
+        "readScale": "Disabled",
+        "readReplicaCount": 0
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/firewallRules",
+      "apiVersion": "2015-05-01-preview",
+      "name": "[concat(variables('sqlServerName'), '/AllowAllWindowsAzureIps')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "properties": {
+        "startIpAddress": "0.0.0.0",
+        "endIpAddress": "0.0.0.0"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2016-08-01",
+      "name": "[variables('configAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "name": "[variables('configAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "enabled": true,
+        "reserved": false,
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": true,
+        "siteConfig": {
+          "alwaysOn": false,
+          "appSettings": [
+            {
+              "name": "SITE_ROLE",
+              "value": "configuration"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "12.13.0"
+            },
+            {
+              "name": "AD_WHITELISTED_USERS",
+              "value": "[parameters('configAdminUPNList')]"
+            },
+            {
+              "name": "AD_CLIENT_ID",
+              "value": "[parameters('configAppID')]"
+            },
+            {
+              "name": "AD_REDIRECT_URL",
+              "value": "[concat(variables('configAppUrl'), '/auth/openid/return')]"
+            },
+            {
+              "name": "AD_LOGOUT_URL",
+              "value": "[concat('https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=', variables('configAppUrl'))]"
+            },
+            {
+              "name": "DB_SERVERNAME",
+              "value": "[concat(variables('sqlServerName'), '.database.windows.net')]"
+            },
+            {
+              "name": "DB_USERNAME",
+              "value": "[parameters('sqlUserName')]"
+            },
+            {
+              "name": "DB_PASSWORD",
+              "value": "[parameters('sqlPassword')]"
+            },
+            {
+              "name": "DB_NAME",
+              "value": "brainysql"
+            },
+            {
+              "name": "TENANT_ID",
+              "value": "[parameters('tenantID')]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2016-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('configAppName'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    }
+  ]
+}

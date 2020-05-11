@@ -1,0 +1,40 @@
+{
+  "extends": ["eslint:recommended", "plugin:node/recommended"],
+  "plugins": ["node", "prettier"],
+  "rules": {
+    "prettier/prettier": "error",
+    "block-scoped-var": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "eol-last": "error",
+    "prefer-arrow-callback": "error",
+    "no-trailing-spaces": "error",
+    "quotes": ["warn", "double", {"avoidEscape": true}],
+    "node/no-missing-import": "off",
+    "node/no-missing-require": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "eqeqeq": [2, "smart"]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "extends": ["plugin:@typescript-eslint/recommended"],
+      "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-use-before-define": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      },
+      "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+      }
+    },
+    {
+      "files": ["**/*.test.ts"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
+}

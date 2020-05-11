@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Tour</title>
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.6.0/js/MicrosoftTeams.min.js"
+    integrity="sha384-mhp2E+BLMiZLe7rDIzj19WjgXJeI32NkPvrvvZBrMi5IvWup/1NUfS5xuYN5S3VT"
+    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+  <link href="styles.css" rel="stylesheet" />
+  <script type="text/javascript">
+    $(document).ready(function () {
+      let queryParameters = GetQueryParameters();
+      let currentTheme = queryParameters["theme"];
+      var setTheme = function (theme) {
+        if (theme === "dark")
+          document.getElementById("themeCSS").className = "theme-dark";
+        else if (theme === "contrast")
+          document.getElementById("themeCSS").className =
+            "theme-highContrast";
+        else document.getElementById("themeCSS").className = "theme-default";
+      };
+      microsoftTeams.initialize();
+      setTheme(currentTheme);
+      microsoftTeams.registerOnThemeChangeHandler(setTheme);
+    });
+    function ShowDivOnClick(div1, div2) {
+      d1 = document.getElementById(div1);
+      d2 = document.getElementById(div2);
+      d1.style.display = "flex";
+      d2.style.display = "none";
+    }
+    function GetQueryParameters() {
+      let queryParams = {};
+      location.search
+        .substr(1)
+        .split("?")
+        .forEach(function (item) {
+          let s = item.split("="),
+            k = s[0],
+            v = s[1] && decodeURIComponent(s[1]);
+          queryParams[k] = v;
+        });
+      return queryParams;
+    }
+  </script>
+</head>
+
+<body id="themeCSS" class="theme-default">
+  <div id="page1Div" class="surface">
+    <div class="imageDiv">
+      <img class="image" src="who.png" alt="Welcome image" />
+    </div>
+    <div class="textDiv">
+      <p class="bold-header">Who's Brainy?</p>
+      <p class="regular-content">
+        If you are reading this you are very much aware that matching a
+        project with the right person is quite an adventure. Not to worry!
+        Brainy is here to create a structured and efficient way of collaborating between the different personas involved
+        in the process of resources allocation.
+        Continue reading if you want to learn how it works.
+      </p>
+    </div>
+    <div class="footer">
+      <button class="primary-button" onclick="ShowDivOnClick('page2Div', 'page1Div')">
+        Next
+      </button>
+    </div>
+  </div>
+  <div id="page2Div" class="surface">
+    <div class="imageDiv">
+      <img class="image" src="taskowner.png" alt="Task Owner image" />
+    </div>
+    <div class="textDiv">
+      <p class="bold-header">As a Task Owner</p>
+      <p class="regular-content">
+        All you have to do is submit a short form describing the project through Brainy - nothing too fancy.
+        You will then be notified when a task executor is assigned to your task.
+      </p>
+    </div>
+    <div class="footer">
+      <button class="primary-button" onclick="ShowDivOnClick('page3Div', 'page2Div')">
+        Next
+      </button>
+      <button class="secondary-button" onclick="ShowDivOnClick('page1Div', 'page2Div')">
+        Back
+      </button>
+    </div>
+  </div>
+  <div id="page3Div" class="surface">
+    <div class="imageDiv">
+      <img class="image" src="manager.png" alt="Manager image" />
+    </div>
+    <div class="textDiv">
+      <p class="bold-header">As a Manager</p>
+      <p class="regular-content">
+        As the Brainy managers, you will have insights into all incoming requests from a central Teams channel.
+        You can choose to assign a specific task executor to a task request, or you can decline a task owner's request.
+        Either
+        way,
+        Brainy will keep the task owners posted!
+      </p>
+    </div>
+    <div class="footer">
+      <button class="primary-button" onclick="ShowDivOnClick('page4Div', 'page3Div')">
+        Next
+      </button>
+      <button class="secondary-button" onclick="ShowDivOnClick('page2Div', 'page3Div')">
+        Back
+      </button>
+    </div>
+  </div>
+  <div id="page4Div" class="surface">
+    <div class="imageDiv">
+      <img class="image" src="taskexecutor.png" alt="Task Executor image" />
+    </div>
+    <div class="textDiv">
+      <p class="bold-header">As a Task Executor</p>
+      <p class="regular-content">
+        Brainy will send a New Task notification once your help is needed. You
+        can still choose to Accept or Decline the request. If you are busy
+        digging your way out of other projects, Brainy got your back! You can
+        choose to pause the system, which will give a break from receiving New
+        Task notifications.
+      </p>
+    </div>
+    <div class="footer">
+      <button class="primary-button" onclick="microsoftTeams.tasks.submitTask(null)">
+        Done
+      </button>
+      <button class="secondary-button" onclick="ShowDivOnClick('page3Div', 'page4Div')">
+        Back
+      </button>
+    </div>
+  </div>
+</body>
+
+</html>
