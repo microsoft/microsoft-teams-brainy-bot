@@ -45,11 +45,11 @@ export async function sendActivitiesToManagerChannel(
   }
   const conversationReference = {
     conversation: {
-      conversationType: "channsssel",
+      conversationType: "channel",
       id: teamId,
       tenantId: currentTenantId,
       isGroup: true,
-      name: "newTask",
+      name: "newActivity",
     },
     channelId: "msteams",
     serviceUrl: currentServiceUrl,
