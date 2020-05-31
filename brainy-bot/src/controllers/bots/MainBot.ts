@@ -95,14 +95,14 @@ export class MainBot extends TeamsActivityHandler {
     const userprofile = await SqlConnector.getUserprofileByUpn(
       member.userPrincipalName!
     );
+    if (!member.aadObjectId) {
+      return;
+    }
     if (!userprofile) {
       await SqlConnector.insertUser(
-        member.userPrincipalName!,
-        member.aadObjectId!,
+        member.aadObjectId,
         member.name,
-        member.givenName!,
-        member.surname!,
-        member.email!,
+        member.givenName || member.name,
         JSON.stringify(conversationReference)
       );
 
