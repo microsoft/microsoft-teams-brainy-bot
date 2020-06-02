@@ -4,6 +4,7 @@ import { Membership } from "./../models/Membership";
 import { ManagerTeam } from "./../models/ManagerTeam";
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { LoggedInUser } from "src/models/LoggedInUser";
 
 @Injectable({
   providedIn: "root",
@@ -13,32 +14,35 @@ export class AppService {
   async getManagerTeam(): Promise<ManagerTeam> {
     return this.http.get<ManagerTeam>("/api/managerteam").toPromise();
   }
-  async getLoggedInUser(): Promise<User> {
-    return this.http.get<User>("/whoami").toPromise();
+  async getLoggedInUser(): Promise<LoggedInUser> {
+    return this.http.get<LoggedInUser>("/whoami").toPromise();
   }
   async getUserMemberships() {
     const memberships = await this.http
       .get<Membership[]>("/api/memberships")
       .toPromise();
-    const users = await this.http.get<User[]>("/api/users/upn").toPromise();
-    const userUpns: string[] = [];
-
-    users.forEach((user) => {
-      userUpns.push(user.upn);
-    });
+    const users = await this.http.get<User[]>("/api/users").toPromise();
+    const userAadObjectIds: string[] = [];
 
     const userMemberships: UserMembership[] = [];
-    userUpns.forEach((upn) => {
+    users.forEach((user) => {
       userMemberships.push({
-        userupn: upn,
+        aadobjectid: user.aadobjectid,
+        name: user.name,
         manager: memberships.some(
-          (membership) => membership.userupn === upn && membership.typeid === 1
+          (membership) =>
+            membership.useraadobjectid === user.aadobjectid &&
+            membership.typeid === 1
         ),
         specialist: memberships.some(
-          (membership) => membership.userupn === upn && membership.typeid === 2
+          (membership) =>
+            membership.useraadobjectid === user.aadobjectid &&
+            membership.typeid === 2
         ),
       });
     });
+    console.log(userMemberships);
+
     return userMemberships;
   }
   async postManagerTeamId(teamId: string) {
@@ -49,17 +53,17 @@ export class AppService {
       })
       .toPromise();
   }
-  async insertMembership(userUpn: string, typeId: number) {
-    const postBody = { userUpn, typeId };
+  async insertMembership(userAadObjectId: string, typeId: number) {
+    const postBody = { userAadObjectId, typeId };
     return this.http
       .post("/api/memberships", postBody, {
         responseType: "text",
       })
       .toPromise();
   }
-  async deleteMembership(userUpn: string, typeId: number) {
+  async deleteMembership(userAadObjectId: string, typeId: number) {
     return this.http
-      .delete(`/api/memberships/${userUpn}/${typeId}`)
+      .delete(`/api/memberships/${userAadObjectId}/${typeId}`)
       .toPromise();
   }
 }

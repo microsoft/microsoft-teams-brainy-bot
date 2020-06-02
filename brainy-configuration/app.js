@@ -151,9 +151,11 @@ app.get("/", (req, res) => {
   res.sendFile("index.html", options);
 });
 
-app.get("/api/users/upn", async (req, res) => {
+app.get("/api/users", async (req, res) => {
   try {
-    result = await executeSimpleQuery("SELECT [upn] FROM [dbo].[user]");
+    result = await executeSimpleQuery(
+      "SELECT [aadobjectid],[name] FROM [dbo].[user]"
+    );
     res.send(result);
   } catch {
     res.sendStatus(503);
@@ -174,9 +176,9 @@ app.post("/api/memberships", async (req, res) => {
     const pool = new sql.ConnectionPool(sqlConnectionConfig);
     await pool.connect();
     const queryDefinition =
-      "INSERT INTO [dbo].[membership] ([userupn],[typeid]) VALUES (@userupn,@typeid)";
+      "INSERT INTO [dbo].[membership] ([useraadobjectid],[typeid]) VALUES (@useraadobjectid,@typeid)";
     const request = new sql.Request(pool);
-    request.input("userupn", sql.NVarChar, req.body.userUpn);
+    request.input("useraadobjectid", sql.NVarChar, req.body.userAadObjectId);
     request.input("typeid", sql.NVarChar, req.body.typeId);
     await request.query(queryDefinition);
     await pool.close();
@@ -186,14 +188,14 @@ app.post("/api/memberships", async (req, res) => {
   }
 });
 
-app.delete("/api/memberships/:userUpn/:typeId", async (req, res) => {
+app.delete("/api/memberships/:userAadObjectId/:typeId", async (req, res) => {
   try {
     const pool = new sql.ConnectionPool(sqlConnectionConfig);
     await pool.connect();
     const queryDefinition =
-      "DELETE [dbo].[membership] WHERE userupn = @userupn AND typeid = @typeid";
+      "DELETE [dbo].[membership] WHERE useraadobjectid = @useraadobjectid AND typeid = @typeid";
     const request = new sql.Request(pool);
-    request.input("userupn", sql.NVarChar, req.params.userUpn);
+    request.input("userAadObjectId", sql.NVarChar, req.params.userAadObjectId);
     request.input("typeid", sql.Int, req.params.typeId);
     await request.query(queryDefinition);
     await pool.close();

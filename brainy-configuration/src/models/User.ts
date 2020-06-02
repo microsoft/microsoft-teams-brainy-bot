@@ -1,3 +1,4 @@
 export interface User {
-  upn: string;
+  aadobjectid: string;
+  name: string;
 }

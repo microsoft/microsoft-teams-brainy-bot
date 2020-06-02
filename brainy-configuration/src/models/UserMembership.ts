@@ -1,5 +1,6 @@
 export interface UserMembership {
-  userupn: string;
+  aadobjectid: string;
+  name: string;
   manager: boolean;
   specialist: boolean;
 }

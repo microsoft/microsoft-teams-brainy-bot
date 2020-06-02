@@ -22,12 +22,12 @@
 
 .form-control:focus {
   box-shadow: 0 0 0 0.05rem #7e62ac !important;
-  border-color: #A88ED5;
+  border-color: #a88ed5;
 }
 
 .form-small {
   width: 30%;
-  margin: 0 auto; 
+  margin: 0 auto;
   margin-bottom: 15px;
 }
 
@@ -83,25 +83,24 @@ table {
 
 .btn-primary,
 .btn-primary:hover,
-.btn-primary:visited
-{
+.btn-primary:visited {
   margin: 25px;
   background-color: #7e62ac !important;
   border-color: #7e62ac !important;
 }
 .btn-primary:active {
   background-color: #7e62ac !important;
-  border-color: #7e62ac  !important;
+  border-color: #7e62ac !important;
 }
 .btn-outline-primary {
-  background-color: #7e62ac  !important;
+  background-color: #7e62ac !important;
   border-color: #7e62ac !important;
-  color: white
+  color: white;
 }
-.btn:focus { 
-  box-shadow: none
+.btn:focus {
+  box-shadow: none;
 }
 
 .btn:hover {
-  opacity: 0.7
+  opacity: 0.7;
 }

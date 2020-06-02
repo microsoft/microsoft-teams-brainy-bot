@@ -1,7 +1,6 @@
 <div *ngIf="pageLoaded">
-
   <div class="toolbar" role="banner">
-    <span class=toolbar-title>Welcome to Brainy's Configuration</span>
+    <span class="toolbar-title">Welcome to Brainy's Configuration</span>
     <span class="toolbar-user"><span class="d-none d-lg-inline">{{ loggedInUser.upn }}</span><a class="btn-logout"
         href="/logout">Log Out</a></span>
   </div>
@@ -10,9 +9,10 @@
   <form class="form-small" #managerTeamForm="ngForm" (ngSubmit)="submitManagerTeamId(managerTeamForm.form)">
     <label class="form-label" for="teamid">Manager Team ID</label>
     <div class="input-group">
-      <input required class=" form-control form-control-sm" type="text" [(ngModel)]="managerTeam.teamid" name="teamid"
+      <input required class="form-control form-control-sm" type="text" [(ngModel)]="managerTeam.teamid" name="teamid"
         #teamid="ngModel" required />
       <div class="input-group-append">
+
         <button class="btn btn-outline-primary btn-sm" type="submit" [disabled]="!teamid.valid">
           Submit
         </button>
@@ -23,38 +23,42 @@
   <h2 class="text-middle">Configure User Memberships</h2>
   <form class="form-big">
     <input class="form-control form-control-sm" type="text" placeholder="Search" name="searchString"
-      [(ngModel)]="searchString">
+      [(ngModel)]="searchString" />
   </form>
 
   <table class="table table-sm table-striped">
     <thead>
       <tr>
-        <th>User UPN</th>
+        <th>User Name</th>
+        <th>AAD Object ID</th>
         <th>Manager</th>
         <th>Task executor</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let userMembership of userMemberships | filter : 'userupn' : searchString;">
+      <tr *ngFor="
+          let userMembership of userMemberships | filter: 'name':searchString">
         <td>
-          {{userMembership.userupn}}
+          {{ userMembership.name }}
+        </td>
+        <td>
+          {{ userMembership.aadobjectid }}
         </td>
         <td>
           <button *ngIf="userMembership.manager === false" class="btn"
-            (click)="insertMembership(userMembership.userupn, 'manager')">❌</button>
+            (click)="insertMembership(userMembership.aadobjectid, 'manager', userMembership.name)">❌</button>
           <button *ngIf="userMembership.manager === true" class="btn"
-            (click)="deleteMembership(userMembership.userupn, 'manager')">✔️</button>
+            (click)="deleteMembership(userMembership.aadobjectid, 'manager', userMembership.name)">✔️</button>
         </td>
         <td>
-          <button *ngIf="userMembership.specialist === false" class=" btn"
-            (click)="insertMembership(userMembership.userupn, 'specialist')">❌</button>
+          <button *ngIf="userMembership.specialist === false" class="btn"
+            (click)="insertMembership(userMembership.aadobjectid,'specialist',userMembership.name)">❌</button>
           <button *ngIf="userMembership.specialist === true" class="btn"
-            (click)="deleteMembership(userMembership.userupn, 'specialist')">✔️</button>
+            (click)="deleteMembership( userMembership.aadobjectid,'specialist',userMembership.name)">✔️</button>
         </td>
       </tr>
     </tbody>
   </table>
-
 </div>
 
 <div *ngIf="!pageLoaded">
