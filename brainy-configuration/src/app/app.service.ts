@@ -22,8 +22,6 @@ export class AppService {
       .get<Membership[]>("/api/memberships")
       .toPromise();
     const users = await this.http.get<User[]>("/api/users").toPromise();
-    const userAadObjectIds: string[] = [];
-
     const userMemberships: UserMembership[] = [];
     users.forEach((user) => {
       userMemberships.push({
@@ -41,8 +39,6 @@ export class AppService {
         ),
       });
     });
-    console.log(userMemberships);
-
     return userMemberships;
   }
   async postManagerTeamId(teamId: string) {
