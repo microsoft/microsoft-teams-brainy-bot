@@ -19,8 +19,11 @@ export class MainBot extends TeamsActivityHandler {
     this.onMessage(async (ctx: TurnContext, next) => {
       const conversationType = ctx.activity.conversation.conversationType;
       const currentaadObjectId = ctx.activity.from.aadObjectId;
+      if (!currentaadObjectId) {
+        throw Error(enUS.exceptions.error.userNotFound);
+      }
       const userProfile = await SqlConnector.getUserprofileByAadObjectId(
-        currentaadObjectId!
+        currentaadObjectId
       );
       if (!userProfile) {
         throw Error(enUS.exceptions.error.userNotFound);
@@ -74,12 +77,18 @@ export class MainBot extends TeamsActivityHandler {
       }
     });
 
-    this.onMembersRemoved(async (ctx: TurnContext, next) => {
+    this.onMembersRemoved(async (ctx: TurnContext) => {
       const membersRemoved = ctx.activity.membersRemoved!;
-      for (const removedMember of membersRemoved) {
-        await SqlConnector.removeUserByAadObjectId(removedMember.aadObjectId!);
+      const teamId = ctx.activity.channelData.team.id;
+      if (!(teamId === (await SqlConnector.getManagerTeamId()))) {
+        for (const removedMember of membersRemoved) {
+          if (removedMember.aadObjectId) {
+            await SqlConnector.removeUserByAadObjectId(
+              removedMember.aadObjectId
+            );
+          }
+        }
       }
-      await next();
     });
   }
 
@@ -92,12 +101,12 @@ export class MainBot extends TeamsActivityHandler {
     const conversationReference = TurnContext.getConversationReference(
       ctx.activity
     );
-    const userprofile = await SqlConnector.getUserprofileByUpn(
-      member.userPrincipalName!
-    );
     if (!member.aadObjectId) {
       return;
     }
+    const userprofile = await SqlConnector.getUserprofileByAadObjectId(
+      member.aadObjectId
+    );
     if (!userprofile) {
       await SqlConnector.insertUser(
         member.aadObjectId,
@@ -106,14 +115,14 @@ export class MainBot extends TeamsActivityHandler {
         JSON.stringify(conversationReference)
       );
 
-      await sendActivitiesToUser(member.userPrincipalName!, [
+      await sendActivitiesToUser(member.aadObjectId, [
         {
           attachments: [CardFactory.adaptiveCard(welcomeTaskownerCard())],
         },
       ]);
     } else {
       await SqlConnector.updateUserprofileConversationReference(
-        member.userPrincipalName!,
+        member.aadObjectId,
         JSON.stringify(conversationReference)
       );
     }

@@ -9,11 +9,16 @@ export interface FormData {
   taskUrl: string;
   taskGoal: string;
   taskRequiredSkills: string;
+  taskOwnerAadObjectId: string;
   taskOwnerUpn: string;
   taskOwnerName: string;
   taskOwnerGivenName: string;
   comment: string;
   rating: number;
+  managerAadObjectId: string;
   managerUpn: string;
+  specialistAadObjectId: string;
+  specialistName: string;
+  specialistGivenName: string;
   specialistUpn: string;
 }

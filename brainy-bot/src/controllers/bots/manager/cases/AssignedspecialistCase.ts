@@ -7,8 +7,8 @@ import {User} from "../../../../models/Database";
 import {enUS} from "../../../../resources/Resources";
 
 export class AssignedspecialistCase {
-  private static specialistIsSelected(specialistUpn: string) {
-    if (!(typeof specialistUpn === "undefined")) {
+  private static specialistIsSelected(specialistAadObjectId: string) {
+    if (!(typeof specialistAadObjectId === "undefined")) {
       return true;
     }
     return false;
@@ -16,11 +16,11 @@ export class AssignedspecialistCase {
 
   private static async taskCanBeAssignedToSpecialist(
     taskId: number,
-    specialistUpn: string
+    specialistAadObjectId: string
   ) {
     const statusTask = await SqlConnector.getStatusIdTask(taskId);
-    const availabilitySpecialist = await SqlConnector.getAvailabilityOfUserprofileByUpn(
-      specialistUpn
+    const availabilitySpecialist = await SqlConnector.getAvailabilityOfUserprofileByAadObjectId(
+      specialistAadObjectId
     );
     if (statusTask === 1 && availabilitySpecialist === true) {
       return true;
@@ -35,25 +35,25 @@ export class AssignedspecialistCase {
     ctx: TurnContext
   ) {
     await ctx.deleteActivity(ctx.activity.replyToId!);
-    if (!this.specialistIsSelected(formData.specialistUpn)) {
+    if (!this.specialistIsSelected(formData.specialistAadObjectId)) {
       throw Error(enUS.exceptions.information.specialistNotSelected);
     }
     if (
       !(await this.taskCanBeAssignedToSpecialist(
         formData.taskId,
-        formData.specialistUpn
+        formData.specialistAadObjectId
       ))
     ) {
       throw Error(enUS.exceptions.information.taskAssignmentNotAllowed);
     }
     const actionId = await SqlConnector.insertAction(
       2,
-      userProfile.upn,
+      userProfile.aadobjectid,
       formData.taskId,
       formData.comment
     );
-    const specialistName = await SqlConnector.getNameOfUserprofileByUpn(
-      formData.specialistUpn
+    const specialistName = await SqlConnector.getNameOfUserprofileByAadObjectId(
+      formData.specialistAadObjectId
     );
     if (!specialistName) {
       throw Error(enUS.exceptions.error.userNotFound);
@@ -70,13 +70,13 @@ export class AssignedspecialistCase {
       ),
     });
     await SqlConnector.insertAssignment(
-      formData.specialistUpn,
+      formData.specialistAadObjectId,
       formData.taskId,
-      userProfile.upn,
+      userProfile.aadobjectid,
       actionId
     );
     await SqlConnector.updateTaskStatusId(formData.taskId, 3);
-    await sendActivitiesToUser(formData.specialistUpn, [
+    await sendActivitiesToUser(formData.specialistAadObjectId, [
       {
         attachments: [
           CardFactory.adaptiveCard(

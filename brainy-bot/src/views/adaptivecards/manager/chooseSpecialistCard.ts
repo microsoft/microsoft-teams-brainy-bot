@@ -8,7 +8,7 @@ export const chooseSpecialistCard = (
     taskLength: string;
     taskName: string;
     taskType: string;
-    taskOwnerUpn: string;
+    taskOwnerAadObjectId: string;
     taskUrl: string;
     taskGoal: string;
     taskRequiredSkills: string;
@@ -33,7 +33,7 @@ export const chooseSpecialistCard = (
               },
               {
                 type: "Input.ChoiceSet",
-                id: "specialistUpn",
+                id: "specialistAadObjectId",
                 style: "compact",
                 isMultiSelect: false,
                 choices: availableSpecialists,

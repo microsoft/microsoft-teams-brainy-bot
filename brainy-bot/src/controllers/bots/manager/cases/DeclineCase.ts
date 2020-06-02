@@ -31,7 +31,7 @@ export class DeclineCase {
     }
     await SqlConnector.insertAction(
       1,
-      userProfile.upn,
+      userProfile.aadobjectid,
       formData.taskId,
       formData.comment
     );
@@ -42,7 +42,7 @@ export class DeclineCase {
         formData.comment
       ),
     });
-    await sendActivitiesToUser(formData.taskOwnerUpn, [
+    await sendActivitiesToUser(formData.taskOwnerAadObjectId, [
       {
         attachments: [
           CardFactory.adaptiveCard(

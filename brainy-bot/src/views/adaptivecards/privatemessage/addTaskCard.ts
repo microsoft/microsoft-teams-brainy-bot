@@ -122,6 +122,7 @@ export const addTaskCard = (
                           enUS.adaptiveCards.addTaskCard
                             .taskLengthValueNumberInputPlaceholder,
                         value: opt.taskLengthValue,
+                        max: 100000,
                       },
                     ],
                   },

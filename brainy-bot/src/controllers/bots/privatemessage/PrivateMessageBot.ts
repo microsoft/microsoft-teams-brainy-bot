@@ -1,5 +1,5 @@
 import {User} from "../../../models/Database";
-import {TurnContext, TeamsActivityHandler} from "botbuilder";
+import {TurnContext, TeamsActivityHandler, TeamsInfo} from "botbuilder";
 import {NewtaskCase} from "./cases/NewtaskCase";
 import {TasksubmitCase} from "./cases/TasksubmitCase";
 import {AcceptCase} from "./cases/AcceptCase";
@@ -23,13 +23,13 @@ export class PrivateMessageBot extends TeamsActivityHandler {
 
     this.onMessage(async (ctx: TurnContext) => {
       const text = ctx.activity.text.trim();
-      let formData = ctx.activity.value as FormData;
+      const formData = ctx.activity.value as FormData;
 
       if (await this.handleTaskOwnerCase(text, ctx, formData)) {
         return;
       }
 
-      if (!(await this.userIsSpecialist(userProfile.upn))) {
+      if (!(await this.userIsSpecialist(userProfile.aadobjectid))) {
         throw Error(enUS.exceptions.warning.specialistRoleDenied);
       }
 
@@ -65,8 +65,10 @@ export class PrivateMessageBot extends TeamsActivityHandler {
         telemetryClient.trackTrace({
           message: "tasksubmit event triggered",
         });
-        formData["taskOwnerUpn"] = this.userProfile.upn;
-        formData = await this.parseFormDataToAddTaskLength(formData);
+        formData["taskOwnerAadObjectId"] = this.userProfile.aadobjectid;
+        formData["taskOwnerUpn"] =
+          (await TeamsInfo.getMember(ctx, this.userProfile.aadobjectid))
+            .userPrincipalName || "";
         await TasksubmitCase.executeCase(formData, ctx);
         break;
       case "taskfeedbacksubmit":
@@ -121,31 +123,14 @@ export class PrivateMessageBot extends TeamsActivityHandler {
     return true;
   }
 
-  private async userIsSpecialist(specialistUpn: string) {
+  private async userIsSpecialist(specialistAadObjectId: string) {
     if (
-      (await SqlConnector.getSpecialistMembershipCount(specialistUpn)) === 1
+      (await SqlConnector.getSpecialistMembershipCount(
+        specialistAadObjectId
+      )) === 1
     ) {
       return true;
     }
     return false;
-  }
-
-  private async parseFormDataToAddTaskLength(formData: FormData) {
-    const allowedLengthUnits = ["hour", "day", "week", "month"];
-    if (
-      formData["taskLengthValue"] > 0 &&
-      allowedLengthUnits.includes(formData["taskLengthUnit"])
-    ) {
-      if (formData["taskLengthValue"] > 1) {
-        formData[
-          "taskLength"
-        ] = `${formData.taskLengthValue} ${formData.taskLengthUnit}s`;
-      } else {
-        formData[
-          "taskLength"
-        ] = `${formData.taskLengthValue} ${formData.taskLengthUnit}`;
-      }
-    }
-    return formData;
   }
 }

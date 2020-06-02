@@ -1,4 +1,4 @@
-import {TurnContext, TeamsActivityHandler} from "botbuilder";
+import {TurnContext, TeamsActivityHandler, TeamsInfo} from "botbuilder";
 import {AssignedspecialistCase} from "./cases/AssignedspecialistCase";
 import {AssignspecialistCase} from "./cases/AssignspecialistCase";
 import {SqlConnector} from "../../../connectors/SqlConnector";
@@ -9,15 +9,22 @@ import {telemetryClient} from "../../../app";
 import {enUS} from "../../../resources/Resources";
 
 export class ManagerBot extends TeamsActivityHandler {
+  userProfile: User;
+
   constructor(userProfile: User) {
     super();
+
+    this.userProfile = userProfile;
 
     this.onMessage(async (ctx: TurnContext) => {
       const text = ctx.activity.text.trim();
       const formData = ctx.activity.value as FormData;
-      formData["managerUpn"] = userProfile.upn;
+      formData["managerAadObjectId"] = this.userProfile.aadobjectid;
+      formData["managerUpn"] =
+        (await TeamsInfo.getMember(ctx, this.userProfile.aadobjectid))
+          .userPrincipalName || "";
 
-      if (!(await this.userIsManager(userProfile.upn))) {
+      if (!(await this.userIsManager(this.userProfile.aadobjectid))) {
         throw Error(enUS.exceptions.warning.managerRoleDenied);
       }
 
@@ -34,13 +41,17 @@ export class ManagerBot extends TeamsActivityHandler {
           telemetryClient.trackTrace({
             message: "assignedspecialist event triggered",
           });
-          await AssignedspecialistCase.executeCase(userProfile, formData, ctx);
+          await AssignedspecialistCase.executeCase(
+            this.userProfile,
+            formData,
+            ctx
+          );
           break;
         case "decline":
           telemetryClient.trackTrace({
             message: "manager decline event triggered",
           });
-          await DeclineCase.executeCase(userProfile, formData, ctx);
+          await DeclineCase.executeCase(this.userProfile, formData, ctx);
           break;
         default:
           throw Error(enUS.exceptions.critical.unknownMessage);
@@ -48,8 +59,10 @@ export class ManagerBot extends TeamsActivityHandler {
     });
   }
 
-  private async userIsManager(managerUpn: string) {
-    if ((await SqlConnector.getManagerMembershipCount(managerUpn)) === 1) {
+  private async userIsManager(managerAadObjectId: string) {
+    if (
+      (await SqlConnector.getManagerMembershipCount(managerAadObjectId)) === 1
+    ) {
       return true;
     }
     return false;
