@@ -7,7 +7,7 @@ export class FormTask {
     url: string,
     goal: string,
     requiredSkills: string,
-    ownerUpn: string
+    ownerAadObjectId: string
   ) {
     this.customer = customer;
     this.length = length;
@@ -16,7 +16,7 @@ export class FormTask {
     this.url = url;
     this.goal = goal;
     this.requiredSkills = requiredSkills;
-    this.ownerUpn = ownerUpn;
+    this.ownerAadObjectId = ownerAadObjectId;
   }
   customer: string;
   length: string;
@@ -25,5 +25,5 @@ export class FormTask {
   url: string;
   goal: string;
   requiredSkills: string;
-  ownerUpn: string;
+  ownerAadObjectId: string;
 }

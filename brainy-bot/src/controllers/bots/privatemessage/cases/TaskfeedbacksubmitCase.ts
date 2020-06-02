@@ -5,8 +5,13 @@ import {FormData} from "../../../../models/FormData";
 import {enUS} from "../../../../resources/Resources";
 
 export class TaskfeedbacksubmitCase {
-  private static async userIsTaskOwner(userUpn: string, taskId: number) {
-    if ((await SqlConnector.getTaskOwnerUpn(taskId)) === userUpn) {
+  private static async userIsTaskOwner(
+    userAadObjectId: string,
+    taskId: number
+  ) {
+    if (
+      (await SqlConnector.getTaskOwnerAadObjectId(taskId)) === userAadObjectId
+    ) {
       return true;
     }
     return false;
@@ -26,14 +31,14 @@ export class TaskfeedbacksubmitCase {
     ctx: TurnContext
   ) {
     if (
-      !(await this.userIsTaskOwner(userProfile.upn, formData.taskId)) ||
+      !(await this.userIsTaskOwner(userProfile.aadobjectid, formData.taskId)) ||
       !(await this.taskHasNoFeedback(formData.taskId))
     ) {
       throw Error(enUS.exceptions.information.feedbackSubmissionFailed);
     }
     await SqlConnector.insertFeedback(
       formData.taskId,
-      userProfile.upn,
+      userProfile.aadobjectid,
       formData.comment,
       formData.rating
     );

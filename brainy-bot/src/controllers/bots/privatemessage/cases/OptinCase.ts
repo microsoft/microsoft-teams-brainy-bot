@@ -6,6 +6,9 @@ import {enUS} from "../../../../resources/Resources";
 export class OptinCase {
   static async executeCase(userProfile: User, ctx: TurnContext) {
     await ctx.sendActivity(enUS.optinNotification);
-    await SqlConnector.updateUserprofileAvailability(userProfile.upn, 1);
+    await SqlConnector.updateUserprofileAvailability(
+      userProfile.aadobjectid,
+      1
+    );
   }
 }

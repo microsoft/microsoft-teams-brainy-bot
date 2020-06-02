@@ -21,7 +21,7 @@ export class TasksubmitCase {
       formData.taskUrl,
       formData.taskGoal,
       formData.taskRequiredSkills,
-      formData.taskOwnerUpn
+      formData.taskOwnerAadObjectId
     );
     const taskValues = Object.values(task);
     if (taskValues.includes("") || taskValues.includes(undefined)) {
@@ -35,6 +35,7 @@ export class TasksubmitCase {
   }
 
   static async executeCase(formData: FormData, ctx: TurnContext) {
+    formData = this.parseFormDataToAddTaskLength(formData);
     if (!this.taskIsValid(formData)) {
       trackDetailedException(
         new Error(enUS.exceptions.information.newTaskFormDataMissing),
@@ -69,7 +70,7 @@ export class TasksubmitCase {
       formData.taskUrl,
       formData.taskGoal,
       formData.taskRequiredSkills,
-      formData.taskOwnerUpn
+      formData.taskOwnerAadObjectId
     );
     const taskId = await SqlConnector.insertTask(task);
     formData["taskId"] = taskId;
@@ -86,5 +87,24 @@ export class TasksubmitCase {
     await ctx.sendActivity({
       attachments: [CardFactory.adaptiveCard(confirmTaskCard())],
     });
+  }
+
+  static parseFormDataToAddTaskLength(formData: FormData) {
+    const allowedLengthUnits = ["hour", "day", "week", "month"];
+    if (
+      formData["taskLengthValue"] > 0 &&
+      allowedLengthUnits.includes(formData["taskLengthUnit"])
+    ) {
+      if (formData["taskLengthValue"] > 1) {
+        formData[
+          "taskLength"
+        ] = `${formData.taskLengthValue} ${formData.taskLengthUnit}s`;
+      } else {
+        formData[
+          "taskLength"
+        ] = `${formData.taskLengthValue} ${formData.taskLengthUnit}`;
+      }
+    }
+    return formData;
   }
 }

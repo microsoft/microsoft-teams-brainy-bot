@@ -7,6 +7,7 @@ export const qualifyTaskCard = (opt: {
   taskLength: string;
   taskName: string;
   taskType: string;
+  taskOwnerAadObjectId: string;
   taskOwnerUpn: string;
   taskUrl: string;
   taskGoal: string;

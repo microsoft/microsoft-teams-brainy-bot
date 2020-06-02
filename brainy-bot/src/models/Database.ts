@@ -8,7 +8,7 @@ export interface Task {
   goal: string;
   requiredskills: string;
   statusid: number;
-  ownerupn: string;
+  owneraadobjectid: string;
   created: string;
   conversationreference: string;
 }
@@ -17,16 +17,16 @@ export interface Action {
   id: number;
   typeid: number;
   taskid: number;
-  userupn: string;
+  useraadobjectid: string;
   comment: string;
   created: string;
 }
 
 export interface Assignment {
   id: number;
-  userupn: string;
+  useraadobjectid: string;
   taskid: number;
-  managerupn: string;
+  manageraadobjectid: string;
   created: string;
   actionid: number;
 }
@@ -34,7 +34,7 @@ export interface Assignment {
 export interface Feedback {
   id: number;
   taskid: number;
-  userupn: string;
+  useraadobjectid: string;
   comment: string;
   rating: number;
   created: string;
@@ -46,17 +46,14 @@ export interface ManagerTeam {
 }
 
 export interface Membership {
-  userupn: string;
+  useraadobjectid: string;
   typeid: number;
 }
 
 export interface User {
-  upn: string;
   aadobjectid: string;
   name: string;
   givenname: string;
-  surname: string;
-  emailaddress: string;
   conversationreference: string;
   availability: boolean;
 }

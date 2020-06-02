@@ -15,7 +15,7 @@ export class DeclineCase {
     if (
       !(await SharedValidators.taskIsPendingSpecialist(formData.taskId)) ||
       !(await SharedValidators.specialistIsCurrentlyAssignedToTask(
-        userProfile.upn,
+        userProfile.aadobjectid,
         formData.taskId
       ))
     ) {
@@ -43,7 +43,7 @@ export class DeclineCase {
     await SqlConnector.updateTaskStatusId(formData.taskId, 1);
     await SqlConnector.insertAction(
       1,
-      userProfile.upn,
+      userProfile.aadobjectid,
       formData.taskId,
       formData.comment
     );

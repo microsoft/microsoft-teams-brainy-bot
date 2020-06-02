@@ -7,7 +7,9 @@ export const newTaskCard = (
     taskLength: string;
     taskName: string;
     taskType: string;
+    taskOwnerAadObjectId: string;
     taskOwnerUpn: string;
+    managerAadObjectId: string;
     managerUpn: string;
     taskUrl: string;
     taskGoal: string;

@@ -1,4 +1,4 @@
 export interface Membership {
-  userupn: string;
+  useraadobjectid: string;
   typeid: number;
 }

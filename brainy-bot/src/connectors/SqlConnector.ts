@@ -40,13 +40,13 @@ export class SqlConnector {
     return userprofiles;
   }
 
-  static async getConversationReferenceByUpn(
-    upn: string
+  static async getConversationReferenceByAadObjectId(
+    aadObjectId: string
   ): Promise<Partial<ConversationReference> | undefined> {
     const queryDefinition =
-      "SELECT [conversationreference] from [dbo].[user] WHERE upn = @upn";
+      "SELECT [conversationreference] from [dbo].[user] WHERE aadobjectid = @aadobjectid";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("upn", NVarChar, upn);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     const userprofile = ((await request.query(queryDefinition))
       .recordset as Array<Pick<User, "conversationreference">>).pop();
     const conversationReference = userprofile?.conversationreference;
@@ -56,12 +56,12 @@ export class SqlConnector {
     return undefined;
   }
 
-  static async getUpnAndNameOfAvailableSpecialists(): Promise<
-    Array<Pick<User, "upn" | "name">>
+  static async getAadObjectIdAndNameOfAvailableSpecialists(): Promise<
+    Array<Pick<User, "aadobjectid" | "name">>
   > {
     const availableSpecialists = (await this.executeSimpleQuery(
-      "SELECT a.[upn], a.[name] FROM [dbo].[user] a INNER JOIN [dbo].[membership] b ON a.upn = b.userupn AND b.typeid = 2 AND a.availability = 1"
-    )) as Array<Pick<User, "upn" | "name">>;
+      "SELECT a.[aadobjectid], a.[name] FROM [dbo].[user] a INNER JOIN [dbo].[membership] b ON a.aadobjectid = b.useraadobjectid AND b.typeid = 2 AND a.availability = 1"
+    )) as Array<Pick<User, "aadobjectid" | "name">>;
     return availableSpecialists;
   }
 
@@ -73,28 +73,29 @@ export class SqlConnector {
     return managerTeam?.teamid;
   }
 
-  static async getTaskOwnerUpn(
+  static async getTaskOwnerAadObjectId(
     taskId: number
-  ): Promise<Task["ownerupn"] | undefined> {
-    const queryDefinition = "SELECT ownerupn FROM [dbo].[task] WHERE id = @id";
+  ): Promise<Task["owneraadobjectid"] | undefined> {
+    const queryDefinition =
+      "SELECT owneraadobjectid FROM [dbo].[task] WHERE id = @id";
     const request = new Request(SqlConnector.connectionPool);
     request.input("id", Int, taskId);
     const task = ((await request.query(queryDefinition)).recordset as Array<
-      Pick<Task, "ownerupn">
+      Pick<Task, "owneraadobjectid">
     >).pop();
-    return task?.ownerupn;
+    return task?.owneraadobjectid;
   }
 
-  static async getLastAssignedSpecialistUpn(
+  static async getLastAssignedSpecialistAadObjectId(
     taskId: number
-  ): Promise<Assignment["userupn"] | undefined> {
+  ): Promise<Assignment["useraadobjectid"] | undefined> {
     const queryDefinition =
-      "SELECT TOP 1 userupn FROM [dbo].[assignment] WHERE taskid = @taskid ORDER BY created DESC";
+      "SELECT TOP 1 useraadobjectid FROM [dbo].[assignment] WHERE taskid = @taskid ORDER BY created DESC";
     const request = new Request(SqlConnector.connectionPool);
     request.input("taskid", Int, taskId);
     const assignment = ((await request.query(queryDefinition))
-      .recordset as Array<Pick<Assignment, "userupn">>).pop();
-    return assignment?.userupn;
+      .recordset as Array<Pick<Assignment, "useraadobjectid">>).pop();
+    return assignment?.useraadobjectid;
   }
 
   static async getConversationReferenceByTaskId(
@@ -126,33 +127,25 @@ export class SqlConnector {
     return userprofile;
   }
 
-  static async getUserprofileByUpn(upn: string): Promise<User | undefined> {
-    const queryDefinition = "SELECT * from [dbo].[user] WHERE upn = @upn";
-    const request = new Request(SqlConnector.connectionPool);
-    request.input("upn", NVarChar, upn);
-    const userprofile = ((await request.query(queryDefinition))
-      .recordset as User[]).pop();
-    return userprofile;
-  }
-
-  static async getAvailabilityOfUserprofileByUpn(
-    upn: string
+  static async getAvailabilityOfUserprofileByAadObjectId(
+    aadObjectId: string
   ): Promise<User["availability"] | undefined> {
     const queryDefinition =
-      "SELECT [availability] from [dbo].[user] WHERE upn = @upn";
+      "SELECT [availability] from [dbo].[user] WHERE aadobjectid = @aadobjectid";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("upn", NVarChar, upn);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     const userprofiles = (await request.query(queryDefinition))
       .recordset as User[];
     return userprofiles.pop()?.availability;
   }
 
-  static async getNameOfUserprofileByUpn(
-    upn: string
+  static async getNameOfUserprofileByAadObjectId(
+    aadObjectId: string
   ): Promise<User["name"] | undefined> {
-    const queryDefinition = "SELECT [name] from [dbo].[user] WHERE upn = @upn";
+    const queryDefinition =
+      "SELECT [name] from [dbo].[user] WHERE aadobjectid = @aadobjectid";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("upn", NVarChar, upn);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     const userprofiles = (await request.query(queryDefinition))
       .recordset as Array<Pick<User, "name">>;
     return userprofiles.pop()?.name;
@@ -184,35 +177,37 @@ export class SqlConnector {
     return feedback;
   }
 
-  static async getManagerMembershipCount(upn: string): Promise<number> {
+  static async getManagerMembershipCount(aadObjectId: string): Promise<number> {
     const queryDefinition =
-      "SELECT COUNT(*) as count from [dbo].[membership] WHERE userupn = @userupn AND typeid = 1";
+      "SELECT COUNT(*) as count from [dbo].[membership] WHERE useraadobjectid = @useraadobjectid AND typeid = 1";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("userupn", NVarChar, upn);
+    request.input("useraadobjectid", NVarChar, aadObjectId);
     const result = (await request.query(queryDefinition)).recordset;
     const count = result.pop().count as number;
     return count;
   }
 
-  static async getSpecialistMembershipCount(upn: string): Promise<number> {
+  static async getSpecialistMembershipCount(
+    aadObjectId: string
+  ): Promise<number> {
     const queryDefinition =
-      "SELECT COUNT(*) as count from [dbo].[membership] WHERE userupn = @userupn AND typeid = 2";
+      "SELECT COUNT(*) as count from [dbo].[membership] WHERE useraadobjectid = @useraadobjectid AND typeid = 2";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("userupn", NVarChar, upn);
+    request.input("useraadobjectid", NVarChar, aadObjectId);
     const result = (await request.query(queryDefinition)).recordset;
     const count = result.pop().count as number;
     return count;
   }
 
   static async updateUserprofileConversationReference(
-    upn: string,
+    aadObjectId: string,
     conversationreference: string
   ) {
     const queryDefinition =
-      "UPDATE [dbo].[user] SET conversationreference = @conversationreference WHERE upn = @upn";
+      "UPDATE [dbo].[user] SET conversationreference = @conversationreference WHERE aadobjectid = @aadobjectid";
     const request = new Request(SqlConnector.connectionPool);
     request.input("conversationreference", NVarChar, conversationreference);
-    request.input("upn", NVarChar, upn);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     await request.query(queryDefinition);
   }
 
@@ -238,34 +233,34 @@ export class SqlConnector {
   }
 
   static async updateUserprofileAvailability(
-    upn: string,
+    aadObjectId: string,
     availability: number
   ): Promise<void> {
     const queryDefinition =
-      "UPDATE [dbo].[user] SET availability = @availability WHERE upn = @upn";
+      "UPDATE [dbo].[user] SET availability = @availability WHERE aadobjectid = @aadobjectid";
     const request = new Request(SqlConnector.connectionPool);
     request.input("availability", Int, availability);
-    request.input("upn", NVarChar, upn);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     await request.query(queryDefinition);
   }
 
   static async insertAction(
     actionType: number,
-    userUpn: string,
+    userAadObjectId: string,
     taskId: number,
     comment?: string
   ): Promise<Action["id"]> {
     const date = new Date();
     let queryDefinition =
-      "INSERT [dbo].[action] ([typeid],[taskid],[userupn],[created]) OUTPUT INSERTED.id VALUES (@actiontype,@taskid,@userupn,@date)";
+      "INSERT [dbo].[action] ([typeid],[taskid],[useraadobjectid],[created]) OUTPUT INSERTED.id VALUES (@actiontype,@taskid,@useraadobjectid,@date)";
     const request = new Request(SqlConnector.connectionPool);
     request.input("actiontype", Int, actionType);
     request.input("taskid", Int, taskId);
-    request.input("userupn", NVarChar, userUpn);
+    request.input("useraadobjectid", NVarChar, userAadObjectId);
     request.input("date", DateTime, date);
     if (!(comment == null) && !(comment === "")) {
       queryDefinition =
-        "INSERT [dbo].[action] ([typeid],[taskid],[userupn],[comment],[created]) OUTPUT INSERTED.id VALUES (@actiontype,@taskid,@userupn,@comment,@date)";
+        "INSERT [dbo].[action] ([typeid],[taskid],[useraadobjectid],[comment],[created]) OUTPUT INSERTED.id VALUES (@actiontype,@taskid,@useraadobjectid,@comment,@date)";
       request.input("comment", NVarChar, comment);
     }
     const action = ((await request.query(queryDefinition))
@@ -278,16 +273,16 @@ export class SqlConnector {
 
   static async insertFeedback(
     taskId: number,
-    userUpn: string,
+    userAadObjectId: string,
     comment: string,
     rating: number
   ): Promise<void> {
     const date = new Date();
     const queryDefinition =
-      "INSERT INTO [dbo].[feedback] ([taskid],[userupn],[comment],[rating],[created]) VALUES (@taskid,@userUpn,@comment,@rating,@date)";
+      "INSERT INTO [dbo].[feedback] ([taskid],[useraadobjectid],[comment],[rating],[created]) VALUES (@taskid,@userAadObjectId,@comment,@rating,@date)";
     const request = new Request(SqlConnector.connectionPool);
     request.input("taskid", Int, taskId);
-    request.input("userupn", NVarChar, userUpn);
+    request.input("useraadobjectid", NVarChar, userAadObjectId);
     request.input("comment", NVarChar, comment);
     request.input("rating", Int, rating);
     request.input("date", DateTime, date);
@@ -297,7 +292,7 @@ export class SqlConnector {
   static async insertTask(task: FormTask): Promise<Task["id"]> {
     const date = new Date();
     const queryDefinition =
-      "INSERT INTO [dbo].[task] ([customer],[name],[type],[length],[url],[goal],[requiredskills],[statusid],[ownerupn],[created]) OUTPUT INSERTED.id VALUES (@customer,@name,@type,@length,@url,@goal,@requiredskills,1,@ownerupn,@date)";
+      "INSERT INTO [dbo].[task] ([customer],[name],[type],[length],[url],[goal],[requiredskills],[statusid],[owneraadobjectid],[created]) OUTPUT INSERTED.id VALUES (@customer,@name,@type,@length,@url,@goal,@requiredskills,1,@owneraadobjectid,@date)";
     const request = new Request(SqlConnector.connectionPool);
     request.input("customer", NVarChar, task.customer);
     request.input("name", NVarChar, task.name);
@@ -306,7 +301,7 @@ export class SqlConnector {
     request.input("url", NVarChar, task.url);
     request.input("goal", NVarChar, task.goal);
     request.input("requiredskills", NVarChar, task.requiredSkills);
-    request.input("ownerupn", NVarChar, task.ownerUpn);
+    request.input("owneraadobjectid", NVarChar, task.ownerAadObjectId);
     request.input("date", DateTime, date);
     const output = ((await request.query(queryDefinition))
       .recordset as Task[]).pop();
@@ -317,41 +312,35 @@ export class SqlConnector {
   }
 
   static async insertAssignment(
-    userUpn: string,
+    userAadObjectId: string,
     taskId: number,
-    managerUpn: string,
+    managerAadObjectId: string,
     actionId: number
   ): Promise<void> {
     const date = new Date();
     const queryDefinition =
-      "INSERT [dbo].[assignment] ([userupn],[taskid],[managerupn],[actionid],[created]) VALUES (@userUpn,@taskId,@managerUpn,@actionid,@date)";
+      "INSERT [dbo].[assignment] ([useraadobjectid],[taskid],[manageraadobjectid],[actionid],[created]) VALUES (@userAadObjectId,@taskId,@managerAadObjectId,@actionid,@date)";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("userUpn", NVarChar, userUpn);
+    request.input("userAadObjectId", NVarChar, userAadObjectId);
     request.input("taskId", Int, taskId);
-    request.input("managerUpn", NVarChar, managerUpn);
+    request.input("managerAadObjectId", NVarChar, managerAadObjectId);
     request.input("actionid", Int, actionId);
     request.input("date", DateTime, date);
     await request.query(queryDefinition);
   }
 
   static async insertUser(
-    upn: string,
-    aadobjectid: string,
+    aadObjectId: string,
     name: string,
     givenname: string,
-    surname: string,
-    emailaddress: string,
     conversationreference: string
   ): Promise<void> {
     const queryDefinition =
-      "INSERT INTO [dbo].[user]([upn],[aadobjectid],[name],[givenname],[surname],[emailaddress],[conversationreference],[availability]) VALUES (@upn,@aadobjectid,@name,@givenname,@surname,@emailaddress,@conversationreference,@availability)";
+      "INSERT INTO [dbo].[user]([aadobjectid],[name],[givenname],[conversationreference],[availability]) VALUES (@aadobjectid,@name,@givenname,@conversationreference,@availability)";
     const request = new Request(SqlConnector.connectionPool);
-    request.input("upn", NVarChar, upn);
-    request.input("aadobjectid", NVarChar, aadobjectid);
+    request.input("aadobjectid", NVarChar, aadObjectId);
     request.input("name", NVarChar, name);
     request.input("givenname", NVarChar, givenname);
-    request.input("surname", NVarChar, surname);
-    request.input("emailaddress", NVarChar, emailaddress);
     request.input("conversationreference", NVarChar, conversationreference);
     request.input("availability", Int, 1);
     await request.query(queryDefinition);
@@ -359,7 +348,7 @@ export class SqlConnector {
 
   static async removeUserByAadObjectId(aadObjectId: string): Promise<void> {
     const queryDefinition =
-      "DECLARE @userupn nvarchar(250) SELECT @userupn = [upn] FROM [dbo].[user] where aadobjectid = @aadobjectid DELETE FROM [dbo].[user] WHERE upn = @userupn DELETE FROM [dbo].[membership] WHERE userupn = @userupn";
+      "DECLARE @useraadobjectid nvarchar(250) SELECT @useraadobjectid = [aadobjectid] FROM [dbo].[user] where aadobjectid = @aadobjectid DELETE FROM [dbo].[user] WHERE aadobjectid = @useraadobjectid DELETE FROM [dbo].[membership] WHERE useraadobjectid = @useraadobjectid";
     const request = new Request(SqlConnector.connectionPool);
     request.input("aadobjectid", NVarChar, aadObjectId);
     await request.query(queryDefinition);

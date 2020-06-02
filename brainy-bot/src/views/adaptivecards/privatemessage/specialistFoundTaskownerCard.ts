@@ -5,6 +5,7 @@ export const specialistFoundTaskownerCard = (opt: {
   taskName: string;
   specialistName: string;
   specialistGivenName: string;
+  specialistAadObjectId: string;
   specialistUpn: string;
   taskUrl: string;
 }) => {
@@ -17,7 +18,6 @@ export const specialistFoundTaskownerCard = (opt: {
   const meetingLink =
     enUS.adaptiveCards.meetingLinkWihoutAttendees(opt.taskCustomer) +
     `&attendees=${opt.specialistUpn}`;
-
   const cardData = {
     type: "AdaptiveCard",
     body: [

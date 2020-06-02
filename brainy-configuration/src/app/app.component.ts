@@ -3,7 +3,7 @@ import { ManagerTeam } from "./../models/ManagerTeam";
 import { AppService } from "./app.service";
 import { Component, OnInit } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
-import { User } from "src/models/User";
+import { LoggedInUser } from "src/models/LoggedInUser";
 
 @Component({
   selector: "app-root",
@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
   pageLoaded = false;
   title = "brainy-configuration";
   managerTeam: ManagerTeam;
-  loggedInUser: User;
+  loggedInUser: LoggedInUser;
   userMemberships: UserMembership[];
   searchString: string;
 
@@ -39,40 +39,42 @@ export class AppComponent implements OnInit {
       this.toastr.error("The entered Team ID deeplink is invalid", "Whoopsie!");
     }
   }
-  async insertMembership(userUpn: string, membershipType: string) {
+  async insertMembership(
+    aadObjectId: string,
+    membershipType: string,
+    name: string
+  ) {
     try {
       if (membershipType === "manager") {
-        await this.appService.insertMembership(userUpn, 1);
+        await this.appService.insertMembership(aadObjectId, 1);
       } else if (membershipType === "specialist") {
-        await this.appService.insertMembership(userUpn, 2);
+        await this.appService.insertMembership(aadObjectId, 2);
       }
       this.userMemberships.find(
-        (userMembership) => userMembership.userupn === userUpn
+        (userMembership) => userMembership.aadobjectid === aadObjectId
       )[membershipType] = true;
-      this.toastr.success(`Assigned membership to ${userUpn}`, "Success!");
+      this.toastr.success(`Assigned membership to ${name}`, "Success!");
     } catch {
-      this.toastr.error(
-        `Couldn't assign membership to ${userUpn}`,
-        "Whoopsie!"
-      );
+      this.toastr.error(`Couldn't assign membership to ${name}`, "Whoopsie!");
     }
   }
-  async deleteMembership(userUpn: string, membershipType: string) {
+  async deleteMembership(
+    userAadObjectId: string,
+    membershipType: string,
+    name: string
+  ) {
     try {
       if (membershipType === "manager") {
-        await this.appService.deleteMembership(userUpn, 1);
+        await this.appService.deleteMembership(userAadObjectId, 1);
       } else if (membershipType === "specialist") {
-        await this.appService.deleteMembership(userUpn, 2);
+        await this.appService.deleteMembership(userAadObjectId, 2);
       }
       this.userMemberships.find(
-        (userMembership) => userMembership.userupn === userUpn
+        (userMembership) => userMembership.aadobjectid === userAadObjectId
       )[membershipType] = false;
-      this.toastr.success(`Removed membership from ${userUpn}`, "Success!");
+      this.toastr.success(`Removed membership from ${name}`, "Success!");
     } catch {
-      this.toastr.error(
-        `Couldn't remove membership from ${userUpn}`,
-        "Whoopsie!"
-      );
+      this.toastr.error(`Couldn't remove membership from ${name}`, "Whoopsie!");
     }
   }
 

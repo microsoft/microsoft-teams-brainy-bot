@@ -8,6 +8,9 @@ export class OptoutCase {
     await ctx.sendActivity({
       attachments: [CardFactory.adaptiveCard(optoutCard())],
     });
-    await SqlConnector.updateUserprofileAvailability(userProfile.upn, 0);
+    await SqlConnector.updateUserprofileAvailability(
+      userProfile.aadobjectid,
+      0
+    );
   }
 }

@@ -4,11 +4,11 @@ import {adapter} from "../../app";
 import {enUS} from "../../resources/Resources";
 
 export async function sendActivitiesToUser(
-  upn: string,
+  aadObjectId: string,
   activities: Array<Partial<Activity>>
 ): Promise<void> {
-  const conversationReference = await SqlConnector.getConversationReferenceByUpn(
-    upn
+  const conversationReference = await SqlConnector.getConversationReferenceByAadObjectId(
+    aadObjectId
   );
   if (!conversationReference) {
     throw Error(enUS.exceptions.error.userNotFound);
@@ -45,11 +45,11 @@ export async function sendActivitiesToManagerChannel(
   }
   const conversationReference = {
     conversation: {
-      conversationType: "channsssel",
+      conversationType: "channel",
       id: teamId,
       tenantId: currentTenantId,
       isGroup: true,
-      name: "newTask",
+      name: "newActivity",
     },
     channelId: "msteams",
     serviceUrl: currentServiceUrl,

@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[action]
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[typeid] [int] NOT NULL,
 	[taskid] [int] NOT NULL,
-	[userupn] [nvarchar](250) NOT NULL,
+	[useraadobjectid] [nvarchar](250) NOT NULL,
 	[comment] [nvarchar](1500) NULL,
 	[created] [datetime] NOT NULL,
 	CONSTRAINT [PK_action] PRIMARY KEY CLUSTERED 
@@ -40,9 +40,9 @@ GO
 CREATE TABLE [dbo].[assignment]
 (
 	[id] [int] IDENTITY(1,1) NOT NULL,
-	[userupn] [nvarchar](250) NOT NULL,
+	[useraadobjectid] [nvarchar](250) NOT NULL,
 	[taskid] [int] NOT NULL,
-	[managerupn] [nvarchar](250) NOT NULL,
+	[manageraadobjectid] [nvarchar](250) NOT NULL,
 	[actionid] [int] NOT NULL,
 	[created] [datetime] NOT NULL,
 	CONSTRAINT [PK_assignment] PRIMARY KEY CLUSTERED 
@@ -60,7 +60,7 @@ CREATE TABLE [dbo].[feedback]
 (
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[taskid] [int] NOT NULL,
-	[userupn] [nvarchar](250) NOT NULL,
+	[useraadobjectid] [nvarchar](250) NOT NULL,
 	[comment] [nvarchar](1500) NULL,
 	[rating] [int] NULL,
 	[created] [datetime] NOT NULL,
@@ -77,11 +77,11 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[membership]
 (
-	[userupn] [nvarchar](250) NOT NULL,
+	[useraadobjectid] [nvarchar](250) NOT NULL,
 	[typeid] [int] NOT NULL,
 	CONSTRAINT [PK_membership] PRIMARY KEY CLUSTERED 
 (
-	[userupn] ASC,
+	[useraadobjectid] ASC,
 	[typeid] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
@@ -133,7 +133,7 @@ CREATE TABLE [dbo].[task]
 	[goal] [nvarchar](200) NOT NULL,
 	[requiredskills] [nvarchar](1000) NOT NULL,
 	[statusid] [int] NOT NULL,
-	[ownerupn] [nvarchar](250) NOT NULL,
+	[owneraadobjectid] [nvarchar](250) NOT NULL,
 	[created] [datetime] NOT NULL,
 	[conversationreference] [nvarchar](max) NULL,
 	CONSTRAINT [PK_engagement] PRIMARY KEY CLUSTERED 
@@ -164,17 +164,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[user]
 (
-	[upn] [nvarchar](250) NOT NULL,
 	[aadobjectid] [nvarchar](500) NOT NULL,
 	[name] [nvarchar](500) NOT NULL,
 	[givenname] [nvarchar](500) NOT NULL,
-	[surname] [nvarchar](500) NOT NULL,
-	[emailaddress] [nvarchar](500) NOT NULL,
 	[conversationreference] [nvarchar](max) NOT NULL,
 	[availability] [bit] NOT NULL,
 	CONSTRAINT [PK_user_1] PRIMARY KEY CLUSTERED 
 (
-	[upn] ASC
+	[aadobjectid] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO

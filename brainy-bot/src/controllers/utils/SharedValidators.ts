@@ -2,12 +2,12 @@ import {SqlConnector} from "../../connectors/SqlConnector";
 
 export class SharedValidators {
   static async specialistIsCurrentlyAssignedToTask(
-    specialistUpn: string,
+    specialistAadObjectId: string,
     taskId: number
   ) {
     if (
-      (await SqlConnector.getLastAssignedSpecialistUpn(taskId)) ===
-      specialistUpn
+      (await SqlConnector.getLastAssignedSpecialistAadObjectId(taskId)) ===
+      specialistAadObjectId
     ) {
       return true;
     }
